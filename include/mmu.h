@@ -10,8 +10,8 @@ enum DataType : uint8_t {Char, Short, Int, Float, Long, Double};
 typedef struct Variable {
     std::string name;
     DataType type;
-    int virtual_address;
-    int size;
+    uint32_t virtual_address;
+    uint32_t size;
 } Variable;
 
 typedef struct Process {
@@ -22,7 +22,7 @@ typedef struct Process {
 class Mmu {
 private:
     uint32_t _next_pid;
-    int _max_size;
+    uint32_t _max_size;
     std::vector<Process*> _processes;
 
 public:
@@ -30,6 +30,7 @@ public:
     ~Mmu();
 
     uint32_t createProcess();
+    void addVariableToProcess(uint32_t pid, std::string var_name, DataType type, uint32_t size, uint32_t address);
     void print();
 };
 

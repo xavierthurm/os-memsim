@@ -27,6 +27,28 @@ uint32_t Mmu::createProcess()
     return proc->pid;
 }
 
+void Mmu::addVariableToProcess(uint32_t pid, std::string var_name, DataType type, uint32_t size, uint32_t address)
+{
+    int i;
+    Process *proc = NULL;
+    for (i = 0; i < _processes.size(); i++)
+    {
+        if (_processes[i]->pid == pid)
+        {
+            proc = _processes[i];
+        }
+    }
+
+    Variable *var = new Variable();
+    var->name = var_name;
+    var->virtual_address = address;
+    var->size = size;
+    if (proc != NULL)
+    {
+        proc->variables.push_back(var);
+    }
+}
+
 void Mmu::print()
 {
     int i, j;
