@@ -31,6 +31,22 @@ void PageTable::addEntry(uint32_t pid, int page_number)
 
     int frame = 0; 
     // Find free frame
+    //look at current page table see if anyones using start at 0 and work way up
+    std::vector<std::string> keys = sortedKeys();
+    //if table is empty start at 0
+    int i =0;
+    if(_table.size()==0){
+        _table[entry]=0;
+        return;
+    } else {
+        for(i = 0; i <keys.size(); i++){
+
+        }
+
+
+
+    }
+
     // TODO: implement this!
     _table[entry] = frame;
 }
@@ -41,6 +57,9 @@ int PageTable::getPhysicalAddress(uint32_t pid, uint32_t virtual_address)
     // TODO: implement this!
     int page_number = 0;
     int page_offset = 0;
+    page_number = virtual_address / _page_size;
+    page_offset = virtual_address % _page_size;
+
 
     // Combination of pid and page number act as the key to look up frame number
     std::string entry = std::to_string(pid) + "|" + std::to_string(page_number);
@@ -49,6 +68,7 @@ int PageTable::getPhysicalAddress(uint32_t pid, uint32_t virtual_address)
     int address = -1;
     if (_table.count(entry) > 0)
     {
+        address = _table[entry]*_page_size+page_offset;
         // TODO: implement this!
     }
 
@@ -63,9 +83,9 @@ void PageTable::print()
     std::cout << "------+-------------+--------------" << std::endl;
 
     std::vector<std::string> keys = sortedKeys();
-
+  
     for (i = 0; i < keys.size(); i++)
     {
-        // TODO: print all pages
+        
     }
 }
