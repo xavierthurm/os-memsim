@@ -3,6 +3,13 @@
 #include <cstring>
 #include "mmu.h"
 #include "pagetable.h"
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <vector>
+#include <sstream>
+#include <iterator>
+
 
 void printStartMessage(int page_size);
 void createProcess(int text_size, int data_size, Mmu *mmu, PageTable *page_table);
@@ -10,6 +17,8 @@ void allocateVariable(uint32_t pid, std::string var_name, DataType type, uint32_
 void setVariable(uint32_t pid, std::string var_name, uint32_t offset, void *value, Mmu *mmu, PageTable *page_table, void *memory);
 void freeVariable(uint32_t pid, std::string var_name, Mmu *mmu, PageTable *page_table);
 void terminateProcess(uint32_t pid, Mmu *mmu, PageTable *page_table);
+
+std::vector<int> pid_list;
 
 int main(int argc, char **argv)
 {
@@ -36,16 +45,69 @@ int main(int argc, char **argv)
     std::string command;
     std::cout << "> ";
     std::getline (std::cin, command);
-    while (command != "exit") {
-        // Handle command
-        // TODO: implement this!
 
+    while (command != "exit") {
+        //set command to a char* for using strncmp
+        /*
+        char cmd[command.length() + 1];
+        strcpy(cmd, command.c_str());   
+        */
+
+        //tokenize the string
+        std::istringstream buffer(command);
+        std::istream_iterator<std::string> beg(buffer), end;
+        std::vector<std::string> tokens(beg,end);
+
+        //set first token to a char*, called 'cmd', for using strncmp
+        char cmd[tokens[0].length()];
+        strcpy(cmd, tokens[0].c_str());
+
+        /*
+        // use this for displaying  input line tokens
+        for(std::string st : tokens){
+            std::cout << st << ' ';
+        }
+        */
+
+        // Handle command
+        if(strncmp(cmd,"create", 6) == 0){ //if first 6 digits match to 'create'
+            printf("entered the CRE8 func call\n");
+
+            int text_size= std::stoi(tokens[1]); 
+            int data_size = std::stoi(tokens[2]);
+            
+            //printf("ts: %d, ds: %d\n", text_size, data_size); //test tokens cast to ints
+            createProcess(text_size, data_size, mmu, page_table);
+        }
+        
+        else if(strncmp(cmd,"allocate", 8) == 0){
+            printf("entered the ALLOC8 func call\n");
+        }
+        else if(strncmp(cmd,"set", 3) == 0){
+            printf("entered the SET func call\n");
+        }
+        else if(strncmp(cmd,"print", 5) == 0){
+            printf("entered the PRINT func call\n");
+        }
+        else if(strncmp(cmd,"free", 4) == 0){
+            printf("entered the FREE func call\n");
+        }
+        else if(strncmp(cmd,"terminate", 9) == 0){
+            printf("entered the TERMIN8 func call\n");
+        }
+        else{ //else, unrecognized command. ERROR.
+            printf("error: command not recognized\n");
+        }
+        
         // Get next command
         std::cout << "> ";
         std::getline (std::cin, command);
+        
+        //printf("\n %s \n",command);
+
     }
 
-    // Cean up
+    // Clean up
     free(memory);
     delete mmu;
     delete page_table;
@@ -70,12 +132,20 @@ void printStartMessage(int page_size)
     std::cout << std::endl;
 }
 
+//no error check needed in createProcess
 void createProcess(int text_size, int data_size, Mmu *mmu, PageTable *page_table)
 {
-    // TODO: implement this!
-    //   - create new process in the MMU
-    //   - allocate new variables for the <TEXT>, <GLOBALS>, and <STACK>
-    //   - print pid
+    //   1- create new process in the MMU
+    uint32_t pid = mmu->createProcess(); //create process and save pid
+    pid_list.push_back(pid);    //add pid to list
+
+    //   2- allocate new variables for the <TEXT>, <GLOBALS>, and <STACK>
+    allocateVariable(pid, "<TEXT>", DataType::Char, text_size, mmu, page_table);
+    allocateVariable(pid, "<GLOBALS>", DataType::Char, data_size, mmu, page_table);
+    allocateVariable(pid, "<STACK>", DataType::Char, 65536, mmu, page_table); //65536 is bytes size for this project
+
+    //   3- print pid
+    printf("%d\n",pid);
 }
 
 void allocateVariable(uint32_t pid, std::string var_name, DataType type, uint32_t num_elements, Mmu *mmu, PageTable *page_table)
